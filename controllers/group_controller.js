@@ -2,7 +2,7 @@ const Message = require("../models/message_schema");
 const User = require("../models/user_schema");
 const Group = require("../models/group_schema");
 
-const findUserByToken = require('../lib/find_user');
+const findUserByToken = require("../lib/find_user");
 
 exports.group_list = function (req, res, next) {
   Group.find().exec((err, groups) => {
@@ -122,65 +122,51 @@ exports.group_users_get = function (req, res, next) {
 exports.group_new_message_post = function (req, res, next) {
   const body = req.body;
   const groupId = req.params.id;
-  const userId = findUserByToken(req.headers["authorization"].split(' ')[1]).user_id;
-  //const userId = req.query.user_id;
+  const userId = findUserByToken(
+    req.headers["authorization"].split(" ")[1]
+  ).user_id;
 
-  User.findById(userId).exec((err, user) => {
+  Group.findById(groupId).exec((err, group) => {
     if (err) {
-      return next(err)
+      return next(err);
     }
 
-    if (user) {
-      Group.findById(groupId).exec((err, group) => {
-        if (err){ 
-          return next(err);
-        }
+    if (!group) {
+      var err = new Error("Group not found");
+      err.status = 404;
+      return next(err);
+    }
 
-        if (!group) {
-          var err = new Error("Group not found");
-          err.status = 404;
-          return next(err);
-        }
-
-        if (group.users) {
-          
-        }
-      });
-
+    if (group.users.some((user) => user.id == userId)) {
       const newMessage = new Message({
         message: body.message,
         groupId: groupId,
         userId: userId,
       });
 
-      Group.findByIdAndUpdate(
-        groupId,
-        { $push: { messages: newMessage } },
-        { new: true, upsert: true }
-      ).exec((err, group) => {
+      newMessage.save((err) => {
         if (err) {
+          console.error(err);
           return next(err);
         }
 
-        if (group) {
-          newMessage.save((err) => {
+        group
+          .updateOne(
+            { $push: { messages: newMessage } },
+            { new: true, upsert: true }
+          )
+          .exec((err, grp) => {
             if (err) {
-              console.error(err);
               return next(err);
             }
 
             res.json(newMessage);
           });
-        } else {
-          var err = new Error("Group not found");
-          err.status = 404;
-          return next(err);
-        }
       });
     } else {
-      var err = new Error("User not found");
-      err.status = 404;
-      return next(err);
+      var error = new Error("User is not a part of the Group");
+      error.status = 404;
+      return next(error);
     }
   });
 };
@@ -188,7 +174,9 @@ exports.group_new_message_post = function (req, res, next) {
 exports.group_new_user_post = function (req, res, next) {
   const body = req.body;
   const groupId = req.params.id;
-  const userId = req.query.user_id;
+  const userId = findUserByToken(
+    req.headers["authorization"].split(" ")[1]
+  ).user_id;
 
   User.findById(userId).exec((err, user) => {
     if (err) {
@@ -214,7 +202,7 @@ exports.group_new_user_post = function (req, res, next) {
         }
       });
     } else {
-      var err = new Error("Group not found");
+      var err = new Error("User not found");
       err.status = 404;
       return next(err);
     }
