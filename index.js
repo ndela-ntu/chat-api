@@ -21,6 +21,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+add.get('/', function(req, res) {
+  res.send("<p>Welcome, this is the CHAT-API. Use routes to /chat...</p>");
+});
+
 app.post("/chat/user/login", user_controller.user_login_post);
 app.post("/chat/user", user_controller.user_create_post);
 
