@@ -7,14 +7,14 @@ const Group = require("../models/group_schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-exports.user_list = function (req, res, next) {
+exports.user_list =  (req, res, next) => {
   User.find().exec((err, user) => {
     if (err) {
       console.error(err);
       return next(err);
     }
 
-    res.json(user);
+    return res.json(user);
   });
 };
 
@@ -43,7 +43,7 @@ exports.user_login_post = (req, res, next) => {
         { expiresIn: "1h" }
       );
 
-      res.json({
+      return res.json({
         username: user.username,
         email: user.email,
         token: token,
@@ -91,7 +91,7 @@ exports.user_create_post = (req, res, next) => {
           { expiresIn: "1h" }
         );
 
-        res.json({
+        return res.json({
           _id: newUser._id,
           username: newUser.username,
           email: newUser.email,
@@ -106,7 +106,7 @@ exports.user_create_post = (req, res, next) => {
   }
 };
 
-exports.user_update_patch = function (req, res, next) {
+exports.user_update_patch =  (req, res, next) => {
   const body = req.body;
   const userId = req.params.id;
   const newUser = new User({ _id: userId, name: body.name });
@@ -117,7 +117,7 @@ exports.user_update_patch = function (req, res, next) {
     }
 
     if (user) {
-      res.json(user);
+      return res.json(user);
     } else {
       var err = new Error("User not found");
       err.status = 404;
@@ -126,7 +126,7 @@ exports.user_update_patch = function (req, res, next) {
   });
 };
 
-exports.user_delete = function (req, res, next) {
+exports.user_delete =  (req, res, next) => {
   const body = req.body;
   const userId = req.params.id;
 
@@ -136,7 +136,7 @@ exports.user_delete = function (req, res, next) {
     }
 
     if (user) {
-      res.json(user);
+      return res.json(user);
     } else {
       var err = new Error("User not found");
       err.status = 404;
@@ -145,7 +145,7 @@ exports.user_delete = function (req, res, next) {
   });
 };
 
-exports.user_details_get = function (req, res, next) {
+exports.user_details_get =  (req, res, next) =>  {
   const id = req.params.id;
 
   User.findById(id).exec((err, user) => {
@@ -154,7 +154,7 @@ exports.user_details_get = function (req, res, next) {
     }
 
     if (user) {
-      res.json(user);
+      return res.json(user);
     } else {
       var err = new Error("User not found");
       err.status = 404;
@@ -163,7 +163,7 @@ exports.user_details_get = function (req, res, next) {
   });
 };
 
-exports.user_messages_get = function (req, res, next) {
+exports.user_messages_get =  (req, res, next) => {
   const userId = req.params.id;
   const groupId = req.query.group_id;
 
@@ -179,7 +179,7 @@ exports.user_messages_get = function (req, res, next) {
         }
 
         if (group) {
-          res.json(
+          return res.json(
             group.messages.filter((message) => message.userId == userId)
           );
         } else {

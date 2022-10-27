@@ -10,7 +10,7 @@ exports.group_list = function (req, res, next) {
       return next(err);
     }
 
-    res.json(groups);
+    return res.json(groups);
   });
 };
 
@@ -22,8 +22,7 @@ exports.group_create_post = function (req, res, next) {
     if (err) {
       return next(err);
     }
-    res.status(201);
-    res.json(group);
+    return res.status(201).json(group);
   });
 };
 
@@ -37,7 +36,7 @@ exports.group_update_patch = function (req, res, next) {
     }
 
     if (group) {
-      res.json(group);
+      return res.json(group);
     } else {
       var err = new Error("Group not found");
       err.status = 404;
@@ -56,7 +55,7 @@ exports.group_delete = function (req, res, next) {
     }
 
     if (group) {
-      res.json(group);
+      return res.json(group);
     } else {
       var err = new Error("Group not found");
       err.status = 404;
@@ -74,7 +73,7 @@ exports.group_details_get = function (req, res, next) {
     }
 
     if (group) {
-      res.json(group);
+      return res.json(group);
     } else {
       var err = new Error("Group not found");
       err.status = 404;
@@ -92,7 +91,7 @@ exports.group_messages_get = function (req, res, next) {
     }
 
     if (group) {
-      res.json(group.messages);
+      return res.json(group.messages);
     } else {
       var err = new Error("Group not found");
       err.status = 404;
@@ -110,7 +109,7 @@ exports.group_users_get = function (req, res, next) {
     }
 
     if (group) {
-      res.json(group.users);
+      return res.json(group.users);
     } else {
       var err = new Error("Group not found");
       err.status = 404;
@@ -160,7 +159,7 @@ exports.group_new_message_post = function (req, res, next) {
               return next(err);
             }
 
-            res.json(newMessage);
+            return res.json(newMessage);
           });
       });
     } else {
@@ -194,7 +193,7 @@ exports.group_new_user_post = function (req, res, next) {
         }
 
         if (group) {
-          res.json(user);
+          return res.json(user);
         } else {
           var err = new Error("Group not found");
           err.status = 404;

@@ -6,12 +6,12 @@ exports.message_list = function (req, res, next) {
   Message.find().exec((err, messages) => {
     if (err) {
       console.error(err);
-      res
+      return res
         .status(500)
         .send("An error occurred retrieving the messages from the database");
     }
 
-    res.json(messages);
+    return res.json(messages);
   });
 };
 

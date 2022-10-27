@@ -1,27 +1,41 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const createError = require('http-errors');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const methodOverride = require('method-override');
 
 const app = express();
-
-const mongoose = require("mongoose");
+const database = require("./lib/database");
 
 const error_handler = require("./lib/error_handler");
 const token_auth = require("./middleware/auth");
 
 const groupRouter = require("./routes/group_route");
-var group_controller = require("./controllers/group_controller");
-
+const group_controller = require("./controllers/group_controller");
 const userRouter = require("./routes/user_route");
-var user_controller = require("./controllers/user_controller");
+const user_controller = require("./controllers/user_controller");
+const uploadRouter = require("./routes/upload_route");
+const upload = require("./middleware/upload");
 
 dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 
+app.use(cors({
+  origin: '*',
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', function(req, res) {
+app.get("/", function (req, res) {
   res.send("<p>Welcome, this is the CHAT-API. Use routes to /chat...</p>");
 });
 
@@ -35,14 +49,11 @@ app.use("/chat/user", userRouter);
 app.get("/chat/groups", group_controller.group_list);
 app.use("/chat/group", groupRouter);
 
+app.use("/upload", uploadRouter(upload));
+
 app.use(error_handler);
 
-mongoose.connect(process.env.DB_CONNECT, { useNewUrlParser: true }, function (err, db) {
-  if (err) {
-    console.log(err);
-  } else {
-    app.listen(PORT, () => {
-      console.warn(`Server running in PORT: ${PORT}`);
-    });
-  }
+app.listen(PORT, () => {
+  database.startDatabase();
+  console.warn(`Server running in PORT: ${PORT}`);
 });
